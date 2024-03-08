@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "com.boyonk.musicsync.mixin",
+	"compatibilityLevel": "JAVA_17",
+	"mixins": [
+		"MixinMinecraftServer"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

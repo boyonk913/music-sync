@@ -1,0 +1,38 @@
+{
+	"schemaVersion": 1,
+	"id": "music_sync",
+	"version": "${version}",
+	"name": "Music Sync",
+	"description": "Sync music with everyone online!",
+	"authors": [
+		"boyonk"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/music-sync",
+		"issues": "https://github.com/boyonk913/music-sync/issues",
+		"sources": "https://github.com/boyonk913/music-sync"
+	},
+	"license": "All-Rights-Reserved",
+	"icon": "assets/music_sync/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.boyonk.musicsync.MusicSync"
+		],
+		"client": [
+			"com.boyonk.musicsync.client.MusicSyncClient"
+		]
+	},
+	"mixins": [
+		"music_sync.mixins.json",
+		{
+			"config": "mixins/music_sync.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=${loader_version}",
+		"fabric": "*",
+		"minecraft": "~${minecraft_version}"
+	}
+}
