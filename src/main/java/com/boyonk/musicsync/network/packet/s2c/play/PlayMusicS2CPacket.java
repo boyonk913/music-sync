@@ -7,6 +7,8 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+
 public class PlayMusicS2CPacket implements Packet<ClientPlayPacketListener> {
 
 	@Nullable
@@ -23,6 +25,11 @@ public class PlayMusicS2CPacket implements Packet<ClientPlayPacketListener> {
 			this.sound = Registry.SOUND_EVENT.get(buf.readIdentifier());
 		}
 		this.seed = buf.readVarLong();
+	}
+
+	@Override
+	public void read(PacketByteBuf buf) throws IOException {
+
 	}
 
 	@Override

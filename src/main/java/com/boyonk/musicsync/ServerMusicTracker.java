@@ -52,15 +52,15 @@ public class ServerMusicTracker {
 		if (type == null) return;
 
 		if (this.current != null) {
-			if (!type.getSound().getId().equals(this.current.getId()) && type.shouldReplaceCurrentMusic()) {
-				this.stop(MathHelper.nextInt(this.random, 0, type.getMinDelay() / 2));
+			if (!type.getEvent().getId().equals(this.current.getId()) && type.method_27282()) {
+				this.stop(MathHelper.nextInt(this.random, 0, type.method_27280() / 2));
 			}
 			if (!this.isPlaying()) {
-				this.stop(Math.min(this.timeUntilNextSong, MathHelper.nextInt(this.random, type.getMinDelay(), type.getMaxDelay())));
+				this.stop(Math.min(this.timeUntilNextSong, MathHelper.nextInt(this.random, type.method_27280(), type.method_27281())));
 			}
 		}
 
-		this.timeUntilNextSong = Math.min(this.timeUntilNextSong, type.getMaxDelay());
+		this.timeUntilNextSong = Math.min(this.timeUntilNextSong, type.method_27281());
 		this.timeUntilNextSong--;
 
 		if (this.current == null && this.timeUntilNextSong <= 0) {
@@ -89,7 +89,7 @@ public class ServerMusicTracker {
 	protected void play(MusicSound type) {
 		this.timeUntilNextSong = Integer.MAX_VALUE;
 
-		this.current = type.getSound();
+		this.current = type.getEvent();
 
 
 		PlayMusicS2CPacket packet = new PlayMusicS2CPacket(this.current, this.random.nextLong());
@@ -127,7 +127,7 @@ public class ServerMusicTracker {
 
 		if (types.isEmpty()) return null;
 
-		List<MusicSound> shouldReplaceTypes = types.stream().filter(MusicSound::shouldReplaceCurrentMusic).toList();
+		List<MusicSound> shouldReplaceTypes = types.stream().filter(MusicSound::method_27282).toList();
 
 		if (!shouldReplaceTypes.isEmpty()) {
 			return shouldReplaceTypes.get(this.random.nextInt(shouldReplaceTypes.size()));

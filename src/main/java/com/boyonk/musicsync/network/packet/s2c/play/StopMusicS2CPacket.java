@@ -4,13 +4,16 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 
+import java.io.IOException;
+
 public class StopMusicS2CPacket implements Packet<ClientPlayPacketListener> {
 
 	public StopMusicS2CPacket() {
 
 	}
 
-	public StopMusicS2CPacket(PacketByteBuf buf) {
+	@Override
+	public void read(PacketByteBuf buf) throws IOException {
 
 	}
 

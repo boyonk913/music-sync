@@ -2,7 +2,6 @@ package com.boyonk.musicsync.client;
 
 import com.boyonk.musicsync.MusicSync;
 import com.boyonk.musicsync.network.packet.s2c.play.PlayMusicS2CPacket;
-import com.boyonk.musicsync.network.packet.s2c.play.StopMusicS2CPacket;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -13,7 +12,6 @@ public class MusicSyncClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		ClientPlayNetworking.registerGlobalReceiver(MusicSync.PACKET_STOP_MUSIC, (client, handler, buf, responseSender) -> {
-			StopMusicS2CPacket packet = new StopMusicS2CPacket(buf);
 			client.getMusicTracker().stop();
 		});
 

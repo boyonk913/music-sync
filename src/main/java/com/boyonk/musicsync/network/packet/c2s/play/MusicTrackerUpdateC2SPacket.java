@@ -9,6 +9,8 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+
 
 public class MusicTrackerUpdateC2SPacket implements Packet<ServerPlayPacketListener>, ServerMusicTracker.TrackerData {
 
@@ -35,14 +37,19 @@ public class MusicTrackerUpdateC2SPacket implements Packet<ServerPlayPacketListe
 	}
 
 	@Override
+	public void read(PacketByteBuf buf) throws IOException {
+
+	}
+
+	@Override
 	public void write(PacketByteBuf buf) {
 
 		if (this.type != null) {
 			buf.writeBoolean(true);
-			buf.writeIdentifier(this.type.getSound().getId());
-			buf.writeVarInt(type.getMinDelay());
-			buf.writeVarInt(type.getMaxDelay());
-			buf.writeBoolean(type.shouldReplaceCurrentMusic());
+			buf.writeIdentifier(this.type.getEvent().getId());
+			buf.writeVarInt(type.method_27280());
+			buf.writeVarInt(type.method_27281());
+			buf.writeBoolean(type.method_27282());
 		} else {
 			buf.writeBoolean(false);
 		}
