@@ -3,7 +3,8 @@ package com.boyonk.musicsync.client;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.math.random.Random;
+
+import java.util.Random;
 
 @Environment(EnvType.CLIENT)
 public interface TemporaryRandomSetter {

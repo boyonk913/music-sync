@@ -14,7 +14,6 @@ import net.minecraft.client.sound.SoundManager;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,6 +22,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Random;
 
 @Mixin(MusicTracker.class)
 public class MixinMusicTracker implements ClientMusicTracker {
@@ -108,7 +109,7 @@ public class MixinMusicTracker implements ClientMusicTracker {
 		if (event == null) return;
 
 		this.current = PositionedSoundInstance.music(event);
-		((TemporaryRandomSetter) this.current).setTemporaryRandom(Random.create(seed));
+		((TemporaryRandomSetter) this.current).setTemporaryRandom(new Random(seed));
 		if (this.current.getSound() != SoundManager.MISSING_SOUND) {
 			this.client.getSoundManager().play(this.current);
 		}
