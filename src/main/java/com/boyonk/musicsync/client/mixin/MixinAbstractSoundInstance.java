@@ -2,14 +2,16 @@ package com.boyonk.musicsync.client.mixin;
 
 import com.boyonk.musicsync.client.TemporaryRandomSetter;
 import net.minecraft.client.sound.AbstractSoundInstance;
-import net.minecraft.client.sound.Sound;
+import net.minecraft.client.sound.SoundManager;
 import net.minecraft.client.sound.WeightedSoundSet;
-import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Random;
 
 @Mixin(AbstractSoundInstance.class)
 public class MixinAbstractSoundInstance implements TemporaryRandomSetter {
@@ -23,13 +25,8 @@ public class MixinAbstractSoundInstance implements TemporaryRandomSetter {
 		this.musicsync$tempRandom = random;
 	}
 
-	@Redirect(method = "getSoundSet", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sound/WeightedSoundSet;getSound(Lnet/minecraft/util/math/random/Random;)Lnet/minecraft/client/sound/Sound;"))
-	Sound useTemporaryRandom(WeightedSoundSet instance, Random random) {
-		if (musicsync$tempRandom != null) {
-			Sound sound = instance.getSound(musicsync$tempRandom);
-			musicsync$tempRandom = null;
-			return sound;
-		}
-		return instance.getSound(random);
+	@Inject(method = "getSoundSet", at = @At(value = "RETURN"))
+	void musicsync$useTemporaryRandom(SoundManager soundManager, CallbackInfoReturnable<WeightedSoundSet> cir) {
+		if (musicsync$tempRandom != null) ((TemporaryRandomSetter)cir.getReturnValue()).setTemporaryRandom(musicsync$tempRandom);
 	}
 }

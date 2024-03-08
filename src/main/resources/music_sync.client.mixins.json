@@ -8,6 +8,7 @@
   },
   "client": [
     "MixinAbstractSoundInstance",
-    "MixinMusicTracker"
+    "MixinMusicTracker",
+    "MixinWeightedSoundSet"
   ]
 }

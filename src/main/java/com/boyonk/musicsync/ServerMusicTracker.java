@@ -11,7 +11,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -40,7 +39,7 @@ public class ServerMusicTracker {
 	private SoundEvent current;
 	private int timeUntilNextSong = DEFAULT_TIME_UNTIL_NEXT_SONG;
 
-	private final Random random = Random.create();
+	private final Random random = new Random();
 
 	public ServerMusicTracker(MinecraftServer server) {
 		this.server = server;
