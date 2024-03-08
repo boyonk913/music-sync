@@ -12,7 +12,6 @@ import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.random.Random;
@@ -105,10 +104,10 @@ public class MixinMusicTracker implements ClientMusicTracker {
 	}
 
 	@Override
-	public void play(@Nullable RegistryEntry<SoundEvent> event, long seed) {
+	public void play(@Nullable SoundEvent event, long seed) {
 		if (event == null) return;
 
-		this.current = PositionedSoundInstance.music(event.value());
+		this.current = PositionedSoundInstance.music(event);
 		((TemporaryRandomSetter) this.current).setTemporaryRandom(Random.create(seed));
 		if (this.current.getSound() != SoundManager.MISSING_SOUND) {
 			this.client.getSoundManager().play(this.current);

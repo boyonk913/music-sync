@@ -1,27 +1,26 @@
 package com.boyonk.musicsync.network.packet.s2c.play;
 
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
 public class PlayMusicS2CPacket implements Packet<ClientPlayPacketListener> {
 
 	@Nullable
-	private RegistryEntry<SoundEvent> sound;
+	private SoundEvent sound;
 	private long seed;
 
-	public PlayMusicS2CPacket(@Nullable RegistryEntry<SoundEvent> sound, long seed) {
+	public PlayMusicS2CPacket(@Nullable SoundEvent sound, long seed) {
 		this.sound = sound;
 		this.seed = seed;
 	}
 
 	public PlayMusicS2CPacket(PacketByteBuf buf) {
 		if (buf.readBoolean()) {
-			this.sound = buf.readRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), SoundEvent::fromBuf);
+			this.sound = Registry.SOUND_EVENT.get(buf.readIdentifier());
 		}
 		this.seed = buf.readVarLong();
 	}
@@ -30,7 +29,7 @@ public class PlayMusicS2CPacket implements Packet<ClientPlayPacketListener> {
 	public void write(PacketByteBuf buf) {
 		if (this.sound != null) {
 			buf.writeBoolean(true);
-			buf.writeRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), this.sound, (b, sound) -> sound.writeBuf(b));
+			buf.writeIdentifier(this.sound.getId());
 		} else {
 			buf.writeBoolean(false);
 		}
@@ -38,7 +37,7 @@ public class PlayMusicS2CPacket implements Packet<ClientPlayPacketListener> {
 	}
 
 	@Nullable
-	public RegistryEntry<SoundEvent> getSound() {
+	public SoundEvent getSound() {
 		return sound;
 	}
 

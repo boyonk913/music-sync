@@ -1,16 +1,14 @@
 package com.boyonk.musicsync.network.packet.c2s.play;
 
 import com.boyonk.musicsync.ServerMusicTracker;
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ServerPlayPacketListener;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.registry.Registry;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
 
 public class MusicTrackerUpdateC2SPacket implements Packet<ServerPlayPacketListener>, ServerMusicTracker.TrackerData {
 
@@ -25,7 +23,7 @@ public class MusicTrackerUpdateC2SPacket implements Packet<ServerPlayPacketListe
 
 	public MusicTrackerUpdateC2SPacket(PacketByteBuf buf) {
 		if (buf.readBoolean()) {
-			RegistryEntry<SoundEvent> sound = buf.readRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), SoundEvent::fromBuf);
+			SoundEvent sound = Registry.SOUND_EVENT.get(buf.readIdentifier());
 			int minDelay = buf.readVarInt();
 			int maxDelay = buf.readVarInt();
 			boolean shouldReplaceCurrentMusic = buf.readBoolean();
@@ -41,7 +39,7 @@ public class MusicTrackerUpdateC2SPacket implements Packet<ServerPlayPacketListe
 
 		if (this.type != null) {
 			buf.writeBoolean(true);
-			buf.writeRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), this.type.getSound(), (b, sound) -> sound.writeBuf(b));
+			buf.writeIdentifier(this.type.getSound().getId());
 			buf.writeVarInt(type.getMinDelay());
 			buf.writeVarInt(type.getMaxDelay());
 			buf.writeBoolean(type.shouldReplaceCurrentMusic());

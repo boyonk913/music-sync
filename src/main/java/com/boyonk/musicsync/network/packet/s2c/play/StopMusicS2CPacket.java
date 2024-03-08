@@ -1,6 +1,6 @@
 package com.boyonk.musicsync.network.packet.s2c.play;
 
-import net.minecraft.network.packet.Packet;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 
