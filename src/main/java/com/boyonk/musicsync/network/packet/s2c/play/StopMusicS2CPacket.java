@@ -1,26 +1,18 @@
 package com.boyonk.musicsync.network.packet.s2c.play;
 
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
+import com.boyonk.musicsync.MusicSync;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.util.Identifier;
 
-public class StopMusicS2CPacket implements Packet<ClientPlayPacketListener> {
+public record StopMusicS2CPacket() implements CustomPayload {
 
-	public StopMusicS2CPacket() {
-
-	}
-
-	public StopMusicS2CPacket(PacketByteBuf buf) {
-
-	}
+	public static final Id<StopMusicS2CPacket> ID = new Id<>(new Identifier(MusicSync.NAMESPACE, "stop_music"));
+	public static final PacketCodec<RegistryByteBuf, StopMusicS2CPacket> CODEC = PacketCodec.unit(new StopMusicS2CPacket());
 
 	@Override
-	public void write(PacketByteBuf buf) {
-
-	}
-
-	@Override
-	public void apply(ClientPlayPacketListener listener) {
-
+	public Id<? extends CustomPayload> getId() {
+		return ID;
 	}
 }

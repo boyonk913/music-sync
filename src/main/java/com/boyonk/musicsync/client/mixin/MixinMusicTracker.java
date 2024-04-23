@@ -1,17 +1,14 @@
 package com.boyonk.musicsync.client.mixin;
 
-import com.boyonk.musicsync.MusicSync;
 import com.boyonk.musicsync.client.ClientMusicTracker;
 import com.boyonk.musicsync.client.TemporaryRandomSetter;
 import com.boyonk.musicsync.network.packet.c2s.play.MusicTrackerUpdateC2SPacket;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.MusicTracker;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.sound.SoundManager;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
@@ -24,6 +21,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
 
 @Mixin(MusicTracker.class)
 public class MixinMusicTracker implements ClientMusicTracker {
@@ -91,13 +90,8 @@ public class MixinMusicTracker implements ClientMusicTracker {
 
 		this.musicsync$dirty = false;
 
-		MusicTrackerUpdateC2SPacket packet = new MusicTrackerUpdateC2SPacket(this.musicsync$type, this.musicsync$playing);
-		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		packet.write(buf);
-
-		ClientPlayNetworking.send(MusicSync.PACKET_MUSIC_TRACKER_UPDATE, buf);
-
-
+		MusicTrackerUpdateC2SPacket packet = new MusicTrackerUpdateC2SPacket(Optional.ofNullable(this.musicsync$type), this.musicsync$playing);
+		ClientPlayNetworking.send(packet);
 	}
 
 	private boolean isInGame() {

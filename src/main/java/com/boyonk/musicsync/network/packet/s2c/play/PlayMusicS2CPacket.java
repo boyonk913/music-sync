@@ -1,53 +1,25 @@
 package com.boyonk.musicsync.network.packet.s2c.play;
 
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.registry.Registries;
+import com.boyonk.musicsync.MusicSync;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundEvent;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Identifier;
 
-public class PlayMusicS2CPacket implements Packet<ClientPlayPacketListener> {
+public record PlayMusicS2CPacket(RegistryEntry<SoundEvent> sound, long seed) implements CustomPayload {
 
-	@Nullable
-	private RegistryEntry<SoundEvent> sound;
-	private long seed;
-
-	public PlayMusicS2CPacket(@Nullable RegistryEntry<SoundEvent> sound, long seed) {
-		this.sound = sound;
-		this.seed = seed;
-	}
-
-	public PlayMusicS2CPacket(PacketByteBuf buf) {
-		if (buf.readBoolean()) {
-			this.sound = buf.readRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), SoundEvent::fromBuf);
-		}
-		this.seed = buf.readVarLong();
-	}
+	public static final Id<PlayMusicS2CPacket> ID = new Id<>(new Identifier(MusicSync.NAMESPACE, "play_music"));
+	public static final PacketCodec<RegistryByteBuf, PlayMusicS2CPacket> CODEC = PacketCodec.tuple(
+			SoundEvent.ENTRY_PACKET_CODEC, PlayMusicS2CPacket::sound,
+			PacketCodecs.VAR_LONG, PlayMusicS2CPacket::seed,
+			PlayMusicS2CPacket::new
+	);
 
 	@Override
-	public void write(PacketByteBuf buf) {
-		if (this.sound != null) {
-			buf.writeBoolean(true);
-			buf.writeRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), this.sound, (b, sound) -> sound.writeBuf(b));
-		} else {
-			buf.writeBoolean(false);
-		}
-		buf.writeVarLong(this.seed);
-	}
-
-	@Nullable
-	public RegistryEntry<SoundEvent> getSound() {
-		return sound;
-	}
-
-	public long getSeed() {
-		return seed;
-	}
-
-	@Override
-	public void apply(ClientPlayPacketListener listener) {
-
+	public Id<? extends CustomPayload> getId() {
+		return ID;
 	}
 }

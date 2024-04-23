@@ -1,66 +1,27 @@
 package com.boyonk.musicsync.network.packet.c2s.play;
 
+import com.boyonk.musicsync.MusicSync;
 import com.boyonk.musicsync.ServerMusicTracker;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ServerPlayPacketListener;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.sound.MusicSound;
-import net.minecraft.sound.SoundEvent;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.Identifier;
 
 import java.util.Optional;
 
-public class MusicTrackerUpdateC2SPacket implements Packet<ServerPlayPacketListener>, ServerMusicTracker.TrackerData {
+public record MusicTrackerUpdateC2SPacket(Optional<MusicSound> type, boolean playing) implements CustomPayload, ServerMusicTracker.TrackerData {
 
-	@Nullable
-	private final MusicSound type;
-	private final boolean playing;
-
-	public MusicTrackerUpdateC2SPacket(@Nullable MusicSound type, boolean playing) {
-		this.type = type;
-		this.playing = playing;
-	}
-
-	public MusicTrackerUpdateC2SPacket(PacketByteBuf buf) {
-		if (buf.readBoolean()) {
-			RegistryEntry<SoundEvent> sound = buf.readRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), SoundEvent::fromBuf);
-			int minDelay = buf.readVarInt();
-			int maxDelay = buf.readVarInt();
-			boolean shouldReplaceCurrentMusic = buf.readBoolean();
-			this.type = new MusicSound(sound, minDelay, maxDelay, shouldReplaceCurrentMusic);
-		} else {
-			this.type = null;
-		}
-		this.playing = buf.readBoolean();
-	}
+	public static final Id<MusicTrackerUpdateC2SPacket> ID = new Id<>(new Identifier(MusicSync.NAMESPACE, "music_tracker_update"));
+	public static final PacketCodec<RegistryByteBuf, MusicTrackerUpdateC2SPacket> CODEC = PacketCodec.tuple(
+			PacketCodecs.optional(MusicSync.MUSIC_SOUND_PACKET_CODEC), MusicTrackerUpdateC2SPacket::type,
+			PacketCodecs.BOOL, MusicTrackerUpdateC2SPacket::playing,
+			MusicTrackerUpdateC2SPacket::new
+	);
 
 	@Override
-	public void write(PacketByteBuf buf) {
-
-		if (this.type != null) {
-			buf.writeBoolean(true);
-			buf.writeRegistryEntry(Registries.SOUND_EVENT.getIndexedEntries(), this.type.getSound(), (b, sound) -> sound.writeBuf(b));
-			buf.writeVarInt(type.getMinDelay());
-			buf.writeVarInt(type.getMaxDelay());
-			buf.writeBoolean(type.shouldReplaceCurrentMusic());
-		} else {
-			buf.writeBoolean(false);
-		}
-		buf.writeBoolean(this.playing);
-	}
-
-	public @Nullable MusicSound getType() {
-		return type;
-	}
-
-	public boolean isPlaying() {
-		return playing;
-	}
-
-	@Override
-	public void apply(ServerPlayPacketListener listener) {
-
+	public Id<? extends CustomPayload> getId() {
+		return ID;
 	}
 }

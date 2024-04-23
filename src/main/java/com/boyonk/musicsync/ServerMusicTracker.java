@@ -3,10 +3,7 @@ package com.boyonk.musicsync;
 import com.boyonk.musicsync.network.packet.c2s.play.MusicTrackerUpdateC2SPacket;
 import com.boyonk.musicsync.network.packet.s2c.play.PlayMusicS2CPacket;
 import com.boyonk.musicsync.network.packet.s2c.play.StopMusicS2CPacket;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.sound.MusicType;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -14,10 +11,7 @@ import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -26,16 +20,16 @@ public class ServerMusicTracker {
 	private static final TrackerData DEFAULT_TRACKING_DATA = new TrackerData() {
 
 		@Override
-		public @Nullable MusicSound getType() {
-			return null;
+		public Optional<MusicSound> type() {
+			return Optional.empty();
 		}
 
 		@Override
-		public boolean isPlaying() {
+		public boolean playing() {
 			return false;
 		}
 	};
-	private static final int DEFAULT_TIME_UNTIL_NEXT_SONG = 100;
+	public static final int DEFAULT_TIME_UNTIL_NEXT_SONG = 100;
 
 	private final MinecraftServer server;
 
@@ -47,15 +41,23 @@ public class ServerMusicTracker {
 
 	private final Random random = Random.create();
 
+	private boolean enabled = true;
+
 	public ServerMusicTracker(MinecraftServer server) {
 		this.server = server;
 	}
 
 	public void tick() {
+		if (!this.enabled) {
+			if (!this.trackerData.isEmpty()) this.trackerData.clear();
+			return;
+		}
+
 		if (!this.refreshPlayers()) return;
 
+
 		MusicSound type = this.getMusicType();
-		if(type == null) return;
+		if (type == null) return;
 
 		if (this.current != null) {
 			if (!type.getSound().getKey().equals(this.current.getKey()) && type.shouldReplaceCurrentMusic()) {
@@ -74,19 +76,24 @@ public class ServerMusicTracker {
 		}
 	}
 
+	public void enable() {
+		if (!this.enabled) this.enabled = true;
+	}
+
+	public void disable() {
+		if (this.enabled) this.enabled = false;
+	}
+
 	protected void stop() {
 		this.stop(DEFAULT_TIME_UNTIL_NEXT_SONG);
 	}
 
-	protected void stop(int timeUntilNextSong) {
+	public void stop(int timeUntilNextSong) {
 		this.timeUntilNextSong = timeUntilNextSong;
 
 		if (this.current != null) {
 			StopMusicS2CPacket packet = new StopMusicS2CPacket();
-			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-			packet.write(buf);
-
-			this.server.getPlayerManager().getPlayerList().forEach(player -> ServerPlayNetworking.send(player, MusicSync.PACKET_STOP_MUSIC, buf));
+			this.server.getPlayerManager().getPlayerList().forEach(player -> ServerPlayNetworking.send(player, packet));
 
 			this.current = null;
 		}
@@ -97,13 +104,8 @@ public class ServerMusicTracker {
 
 		this.current = type.getSound();
 
-
 		PlayMusicS2CPacket packet = new PlayMusicS2CPacket(this.current, this.random.nextLong());
-		PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
-		packet.write(buf);
-
-		this.server.getPlayerManager().getPlayerList().forEach(player -> ServerPlayNetworking.send(player, MusicSync.PACKET_PLAY_MUSIC, buf));
-
+		this.server.getPlayerManager().getPlayerList().forEach(player -> ServerPlayNetworking.send(player, packet));
 	}
 
 	/**
@@ -129,7 +131,7 @@ public class ServerMusicTracker {
 
 	@Nullable
 	protected MusicSound getMusicType() {
-		List<MusicSound> types = this.trackerData.values().stream().map(TrackerData::getType).filter(Objects::nonNull).toList();
+		List<MusicSound> types = this.trackerData.values().stream().map(TrackerData::type).filter(Optional::isPresent).map(Optional::get).toList();
 
 		if (types.isEmpty()) return null;
 
@@ -143,7 +145,7 @@ public class ServerMusicTracker {
 	}
 
 	protected boolean isPlaying() {
-		return !this.trackerData.isEmpty() && this.trackerData.values().stream().anyMatch(TrackerData::isPlaying);
+		return !this.trackerData.isEmpty() && this.trackerData.values().stream().anyMatch(TrackerData::playing);
 	}
 
 
@@ -153,9 +155,9 @@ public class ServerMusicTracker {
 
 	public interface TrackerData {
 
-		@Nullable MusicSound getType();
+		Optional<MusicSound> type();
 
-		boolean isPlaying();
+		boolean playing();
 	}
 
 }
