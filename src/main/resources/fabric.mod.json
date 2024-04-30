@@ -26,7 +26,7 @@
 	"mixins": [
 		"music_sync.mixins.json",
 		{
-			"config": "mixins/music_sync.client.mixins.json",
+			"config": "music_sync.client.mixins.json",
 			"environment": "client"
 		}
 	],

@@ -30,7 +30,7 @@ public class ServerMusicTracker {
 			return false;
 		}
 	};
-	private static final int DEFAULT_TIME_UNTIL_NEXT_SONG = 100;
+	public static final int DEFAULT_TIME_UNTIL_NEXT_SONG = 100;
 
 	private final MinecraftServer server;
 
@@ -42,11 +42,18 @@ public class ServerMusicTracker {
 
 	private final Random random = Random.create();
 
+	private boolean enabled = true;
+
 	public ServerMusicTracker(MinecraftServer server) {
 		this.server = server;
 	}
 
 	public void tick() {
+		if (!this.enabled) {
+			if (!this.trackerData.isEmpty()) this.trackerData.clear();
+			return;
+		}
+
 		if (!this.refreshPlayers()) return;
 
 		MusicSound type = this.getMusicType();
@@ -69,11 +76,19 @@ public class ServerMusicTracker {
 		}
 	}
 
+	public void enable() {
+		if (!this.enabled) this.enabled = true;
+	}
+
+	public void disable() {
+		if (this.enabled) this.enabled = false;
+	}
+
 	protected void stop() {
 		this.stop(DEFAULT_TIME_UNTIL_NEXT_SONG);
 	}
 
-	protected void stop(int timeUntilNextSong) {
+	public void stop(int timeUntilNextSong) {
 		this.timeUntilNextSong = timeUntilNextSong;
 
 		if (this.current != null) {
