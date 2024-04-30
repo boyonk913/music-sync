@@ -5,7 +5,6 @@ import com.boyonk.musicsync.network.packet.s2c.play.PlayMusicS2CPacket;
 import com.boyonk.musicsync.network.packet.s2c.play.StopMusicS2CPacket;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.client.sound.MusicType;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.MinecraftServer;
@@ -14,10 +13,7 @@ import net.minecraft.sound.MusicSound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
-import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -35,7 +31,7 @@ public class ServerMusicTracker {
 			return false;
 		}
 	};
-	private static final int DEFAULT_TIME_UNTIL_NEXT_SONG = 100;
+	public static final int DEFAULT_TIME_UNTIL_NEXT_SONG = 100;
 
 	private final MinecraftServer server;
 
@@ -45,6 +41,8 @@ public class ServerMusicTracker {
 	private RegistryEntry<SoundEvent> current;
 	private int timeUntilNextSong = DEFAULT_TIME_UNTIL_NEXT_SONG;
 
+	private boolean enabled = true;
+
 	private final Random random = Random.create();
 
 	public ServerMusicTracker(MinecraftServer server) {
@@ -52,6 +50,11 @@ public class ServerMusicTracker {
 	}
 
 	public void tick() {
+		if (!this.enabled) {
+			if (!this.trackerData.isEmpty()) this.trackerData.clear();
+			return;
+		}
+
 		if (!this.refreshPlayers()) return;
 
 		MusicSound type = this.getMusicType();
@@ -74,11 +77,19 @@ public class ServerMusicTracker {
 		}
 	}
 
+	public void enable() {
+		if (!this.enabled) this.enabled = true;
+	}
+
+	public void disable() {
+		if (this.enabled) this.enabled = false;
+	}
+
 	protected void stop() {
 		this.stop(DEFAULT_TIME_UNTIL_NEXT_SONG);
 	}
 
-	protected void stop(int timeUntilNextSong) {
+	public void stop(int timeUntilNextSong) {
 		this.timeUntilNextSong = timeUntilNextSong;
 
 		if (this.current != null) {
