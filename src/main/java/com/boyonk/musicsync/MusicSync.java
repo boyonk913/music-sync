@@ -1,7 +1,9 @@
 package com.boyonk.musicsync;
 
 import com.boyonk.musicsync.network.packet.c2s.play.MusicTrackerUpdateC2SPacket;
+import com.boyonk.musicsync.server.command.MusicCommand;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.util.Identifier;
@@ -16,6 +18,7 @@ public class MusicSync implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		CommandRegistrationCallback.EVENT.register(MusicCommand::register);
 		ServerPlayNetworking.registerGlobalReceiver(MusicSync.PACKET_MUSIC_TRACKER_UPDATE, (server, player, handler, buf, responseSender) -> {
 			MusicTrackerUpdateC2SPacket packet = new MusicTrackerUpdateC2SPacket(buf);
 			((ServerMusicTrackerHolder) server).getMusicTracker().onUpdate(packet, player);
